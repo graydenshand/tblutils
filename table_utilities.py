@@ -37,24 +37,8 @@ class Table():
 		else:
 			return('Empty Table Utility Instance')
 
-	def __getitem__(self,(x,y)):
-		if isinstance(self._data[y], list):
-			cols = self._data[y]
-		else:
-			cols = [self._data[y]]
-		rows = [[col.label for col in cols]]
-		for col in cols:
-			if isinstance(col[x], list):
-				rows.append(col[x])
-			else:
-				rows.append([col[x]])
-		if len(rows) <= 2 and len(rows[1]) == 1:
-			return rows[1][0]
-		if len(rows) == 1:
-			return rows[1]
-		tmp = Table()
-		tmp.load(rows, 'long_list')
-		return tmp
+	def __getitem__(self,col):
+		return self._data[col]
 
 	def __len__(self):
 		return 0 if len(self._data) == 0 else len(self._data[0])
@@ -236,17 +220,15 @@ class Table():
 		# df1 = df.sort('First Name')
 		# df1 = df.sort('First Name', 'Zip')
 		tmp = self.copy()
+		col = self.col(cols[0])
 		i = 0
 		sorted_col = Column()
 		indices = []
 		search_list = []
 		while i < len(self):
-			row = {}
-			for col in cols:
-				row[self.col(col).label] = self.col(col)[i]
-				search_list.append(row)
-			idx = sorted_col._binary_search(row)
-			sorted_col.insert(idx, row)
+			val = col[i]
+			idx = sorted_col._binary_search(val)
+			sorted_col.insert(idx, val)
 			indices.insert(idx, i)
 			i += 1
 		tmp._data = []
@@ -660,7 +642,7 @@ class Column():
 			return start
 
 		# recursive search
-		mid = (end + start)/2
+		mid = (end + start)//2
 		if isinstance(x, (str,)):
 			if x.lower() < self[mid].lower():
 				return self._binary_search(x, start, mid)
@@ -765,7 +747,7 @@ class Column():
 
 if __name__ == "__main__":
 	df = Table('student_data.csv')
-	df1 = df.filter(df.col('First Name') !='Grayden').sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
+	df1 = df.filter(df.col('First Name') !='Grayden').sort('First Name').select('Cohort', 'First Name').desc()
 
 	#df1.append({'First Name': 'Grayden', 'Last Name': 'Shanaaaad'})
 
