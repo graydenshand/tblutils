@@ -43,12 +43,6 @@ class Table():
 	def __len__(self):
 		return 0 if len(self._data) == 0 else len(self._data[0])
 
-	def col(self, label):
-		for col in self._data:
-			if col.label == label:
-				return col 
-		raise ValueError('No column named {}'.format(label))
-
 	def headers(self):
 		return [col.label for col in self._data]
 
@@ -196,6 +190,8 @@ class Table():
 	def select(self, *cols):
 		## produce a subset based on a list of column names
 		indices = [self._get_col_index(col) for col in cols]
+		if len(cols) == 1:
+			return self._data[indices[0]]
 		new = Table()
 		new._data = [self._data[i] for i in indices]
 		return new
@@ -203,8 +199,8 @@ class Table():
 	def filter(self, *bool_lists):
 		"""
 		usage: 
-		d1 = data.filter(data.col('First Name') == 'Grayden')
-		d1 = data.filter([name in ('Grayden', 'Tom') for name in df.col('First Name')], [data.col('Cohort') in ('ogre', 'opal')])
+		d1 = data.filter(data.select('First Name') == 'Grayden')
+		d1 = data.filter([name in ('Grayden', 'Tom') for name in df.select('First Name')], [data.select('Cohort') in ('ogre', 'opal')])
 		"""
 		indices = []
 		tmp = self.copy()
@@ -226,7 +222,7 @@ class Table():
 		tmp = self.copy()
 		for i, col in enumerate(tmp):
 			tmp[i] = Column([], col.label)
-		first_col = tmp.col(cols[0]) # get the first column to sort by
+		first_col = tmp.select(cols[0]) # get the first column to sort by
 		i = 0
 		indices = []
 		while i < len(self):
@@ -237,13 +233,13 @@ class Table():
 				tmp.insert(self._place_row(row, tmp, idx, 0, cols), row)
 			else: # new value is not different from adjacent value
 				tmp.insert(idx, row)
-			first_col = tmp.col(cols[0])
+			first_col = tmp.select(cols[0])
 			i += 1
 		return tmp
 
 
 	def _place_row(self, row, data, row_idx, col_idx, cols):
-		col = data.col(cols[col_idx])
+		col = data.select(cols[col_idx])
 		new_val = row[col.label]
 		#print(len(col), row_idx)
 		if len(col) == row_idx or new_val < col[row_idx]:
@@ -795,20 +791,20 @@ class Column():
 
 if __name__ == "__main__":
 	#df = Table('student_data.csv')
-	#df1 = df.filter(df.col('First Name') != 'Grayden', df.col('Cohort') == 'ibex').sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
+	#df1 = df.filter(df.select('First Name') != 'Grayden', df.select('Cohort') == 'ibex').sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
 
 	#df1.append({'First Name': 'Grayden', 'Last Name': 'Shanaaaad'})
-	#x = df1.col('Cohort') == 'ibex'
+	#x = df1.select('Cohort') == 'ibex'
 	#print(df1.data())
 
 	#print(Table())
 
 	x = Column([1,5,9,15])
-	y = Column()
+	y = Column([1,2,3,4])
 	print(x)
 	print(y)
-	#z = {'testers': 30, 'test2': 35}
-	#df = Table([x,y])
+	df = Table([x,y])
+	print(df.select("Column1"))
 	#df.insert(20, z)
 	#print(df.data('list'))
 	#val = 4
@@ -817,7 +813,7 @@ if __name__ == "__main__":
 	#print(x)
 	
 
-	#df1 = df1.filter(df1.col('First Name') < 'Tom')
+	#df1 = df1.filter(df1.select('First Name') < 'Tom')
 	#df1 = df1.select('Cohort','First Name')
 	#print(df1.data(), df1)
 	#print(df1._write_create_table('student', 'First Name'))
@@ -835,7 +831,7 @@ if __name__ == "__main__":
 
 	#col = Column(['2019',1,2,3,4], 'numbers')
 	#col = Column(['1.0',1,2,3,4], 'numbers')
-	#x = df1.col('First Name')._get_data_type()
+	#x = df1.select('First Name')._get_data_type()
 	#x = col._get_data_type()
 	#print(x)
 
@@ -843,8 +839,8 @@ if __name__ == "__main__":
 
 	"""
 	# Filter ~ Multi-column
-	d1 = [name in ('Grayden', 'Tom') for name in df.col('First Name')]
-	print(df.filter(d1, df.col('Email') != '').select('First Name').data())
+	d1 = [name in ('Grayden', 'Tom') for name in df.select('First Name')]
+	print(df.filter(d1, df.select('Email') != '').select('First Name').data())
 	"""
 
 	# Column
