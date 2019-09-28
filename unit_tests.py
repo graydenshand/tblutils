@@ -1,7 +1,6 @@
 import csv, re, pymysql, psycopg2, psycopg2.extras, copy, json
 from datetime import datetime, date
-from table import Table
-from column import Column
+from models import Table, Column
 
 if __name__ == "__main__":
 	#df = Table('student_data.csv')
