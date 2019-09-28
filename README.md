@@ -68,4 +68,4 @@ print(tbl.data('list')) # list of lists
 
 Columns within a table can be accessed in two ways: 
 1) The first is to use their integer index and standard slice notation (e.g. `tbl[0] # returns first column`). Note, this means that `enumerate(tbl)` is a column-wise generator, row-wise enumeration can be achieved via `enumerate(tbl.data())`.
-2) Secondly, they can be accessed by their `.label` (column-name) through the table's `col()` method (e.g. `tbl.col('Column1')`).
+2) Secondly, they can be accessed by their `.label` (column name) through the table's `select()` method (e.g. `tbl.select('Column1')`). Multiple labels can be passed to `select()` and a new table is returned containing only the specified columns.
