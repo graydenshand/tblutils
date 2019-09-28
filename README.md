@@ -28,9 +28,9 @@ In addition to the `data` parameter, `__init__()` and `load()` take two other pa
 load(self, data, data_type=None, headers=True)
 __init__(self, data=None, data_type=None, headers=True)
 ```
-* `data_type` *Str::None* - currently supported data types are .csv & .json files, and lists of: lists, dictionaries, columns
+* `data_type` *Str::None* - currently supported data types are: `'csv'` and `'json'` for .csv & .json files, and `'list'`,`'dict'`, `'column'` for lists of: lists, dictionaries, columns. If `data_type` is `None`, `load()` invokes the `_get_data_type()` method to guess the data type.
 * `headers` *Bool::True* - flag to indicate if headers are included in the dataset (only applicable for .csv and list-of-list data types)
-if `data_type` is `None`, `load()` invokes the `_get_data_type()` method to guess the data type.
+
 
 
 ### Saving Data
