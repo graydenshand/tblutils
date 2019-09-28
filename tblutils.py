@@ -25,17 +25,14 @@ class Table():
 		
 	"""
 
-	def __init__(self, data=None, data_type=None):
+	def __init__(self, data=None, data_type=None, headers=True):
 		if data is not None:
-			self.load(data, data_type)
+			self.load(data, data_type, headers)
 		else:
 			self._data = []
 
 	def __repr__(self):
-		if len(self) != 0:
-			return'{} rows <> {}'.format(len(self), self.headers())
-		else:
-			return('Empty Table Utility Instance')
+		return'{} rows <> {}'.format(len(self), self.headers())
 
 	def __getitem__(self,col):
 		return self._data[col]
@@ -60,6 +57,7 @@ class Table():
 			return []
 		else:
 			if _format == 'list':
+				# [[], [], []]
 				tmp = [[col.label for col in self._data]]
 				i = 0
 				while i < len(self):
@@ -70,7 +68,7 @@ class Table():
 				# [{}, {}, {}]
 				tmp = []
 				for i, col in enumerate(self._data):
-					for idx, val in enumerate(self._data[i]):
+					for idx, val in enumerate(col):
 						if i == 0:
 							tmp.append({col.label:val})
 						else:
@@ -81,18 +79,16 @@ class Table():
 		return copy.deepcopy(self)
 
 	## LOADER
-	def load(self, data=None, data_type=None):
+	def load(self, data, data_type=None, headers=True):
 		if data_type == None:
 			data_type = self._get_data_type(data)
 		# router to use appropriate loader function
 		if data_type == 'csv':
-			self._data = self._read_csv(data)
+			self._data = self._read_csv(data, headers)
 		elif data_type == 'list':
-			self._data = self._load_lists(data)
+			self._data = self._load_lists(data, headers)
 		elif data_type == 'dict':
 			self._data = self._load_dicts(data)
-		elif data_type == 'long_list':
-			self._data = self._load_long_lists(data)
 		elif data_type == 'json':
 			self._data = self._read_json(data)
 		elif data_type == 'column':
@@ -142,6 +138,23 @@ class Table():
 			raise ValueError('Data should be list of lists/dicts')
 
 	def _load_columns(self, data):
+		tmp_data = []
+		headers = []
+		length = len(data[0])
+		for col in data:
+			if len(col) != length:
+				raise ValueError('Columns are unequal lengths')
+
+			if col.label == '':
+				flag = False
+				i = 1
+				while flag != True:
+					if f'Column{i}' not in headers:
+						flag = True
+						col.label = f'Column{i}'
+					i += 1
+				tmp_data.append(col)
+				headers.append(col.label)
 		return data
 
 	def _load_lists(self, data, headers=True):
@@ -158,21 +171,6 @@ class Table():
 					tmp_data[item].append(row[item])
 		return tmp_data
 
-	def _load_long_lists(self, data, headers=True):
-		tmp_data = []
-		for i, row in enumerate(data):
-			if headers == True and i == 0:
-				for item, col in enumerate(row):
-					col = Column(data[item+1],label=col)
-					tmp_data.append(col)
-				return tmp_data
-			else:
-				for item, val in enumerate(row):
-					print(item, val)
-					tmp_data[item].append(col)
-				return tmp_data
-		return tmp_data
-
 
 	def _load_dicts(self, data):
 		tmp_data = [Column([], label=label) for label in data[0].keys()]
@@ -182,7 +180,7 @@ class Table():
 		return tmp_data
 
 
-	## MUTATOR
+	## MUTATORS
 	def _get_col_index(self, col):
 		## get list of indices for a column
 		if not isinstance(col, str):
@@ -209,7 +207,7 @@ class Table():
 		d1 = data.filter([name in ('Grayden', 'Tom') for name in df.col('First Name')], [data.col('Cohort') in ('ogre', 'opal')])
 		"""
 		indices = []
-		tmp = copy.deepcopy(self)
+		tmp = self.copy()
 		tmp._data = []
 		i = 0
 		while i < len(self):
@@ -273,17 +271,17 @@ class Table():
 
 	def add(self, col):
 		if len(col) != len(self):
-			raise InputError("Input size doesn't match existing data.")
+			raise ValueError("Input size doesn't match existing data.")
 		else:
 			if col.label == '':
 				flag = False
-				i = 0
+				i = 1
 				while flag != True:
 					if f'Column{i}' not in self.headers():
 						flag = True
 						col.label = f'Column{i}'
-						self._data.append(col)
 					i += 1
+				self._data.append(col)
 		return self
 
 	def append(self, row):
@@ -322,17 +320,21 @@ class Table():
 	def save(self, fn):
 		data_type = self._get_data_type(fn)
 		if data_type == 'csv':
-			with open(fn, 'w') as f:
-				writer = csv.writer(f)
-				writer.writerow(self.headers())
-				i = 0
-				while i < len(self):
-					writer.writerow([col[i] for col in self._data])
-					i += 1
+			self._write_csv(fn)
 		elif data_type == 'json':
 			self._write_json(fn)
 		else:
 			raise ValueError('Unable to save in that format, .csv and .json supported')
+		return True
+
+	def _write_csv(self, fn):
+		with open(fn, 'w') as f:
+			writer = csv.writer(f)
+			writer.writerow(self.headers())
+			i = 0
+			while i < len(self):
+				writer.writerow([col[i] for col in self._data])
+				i += 1
 		return True
 
 	def _write_json(self, fn):
@@ -396,9 +398,13 @@ class Table():
 
 class Column():
 
-	def __init__(self, data=[], label='', _type=None):
-		self._data, self.label = list(data), str(label)
-		if _type is None and len(data) > 0:
+	def __init__(self, data=None, label='', _type=None):
+		self.label =  str(label)
+		if data==None:
+			self._data = []
+		else:
+			self._data = list(data)
+		if self._data is not None and _type is None and len(self._data) > 0:
 			self._type = self._get_data_type()
 		else:
 			self._type = _type
@@ -657,7 +663,7 @@ class Column():
 
 	def filter(self,expr):
 		i = 0
-		tmp = Column([])
+		tmp = Column()
 		while i < len(self._data):
 			if expr[i]:
 				tmp.append(self._data[i])
@@ -747,8 +753,8 @@ class Column():
 				else:
 					return 'text'
 
-
-	def _parse_date(self, val):
+	@staticmethod
+	def _parse_date(val):
 		try:
 			x = datetime.strptime(val, '%Y-%m-%d')
 			return ('date', x)
@@ -788,26 +794,28 @@ class Column():
 
 
 if __name__ == "__main__":
-	df = Table('student_data.csv')
-	df1 = df.filter(df.col('First Name') != 'Grayden', df.col('Cohort') == 'ibex').sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
+	#df = Table('student_data.csv')
+	#df1 = df.filter(df.col('First Name') != 'Grayden', df.col('Cohort') == 'ibex').sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
 
 	#df1.append({'First Name': 'Grayden', 'Last Name': 'Shanaaaad'})
 	#x = df1.col('Cohort') == 'ibex'
-	print(df1.data())
+	#print(df1.data())
 
+	#print(Table())
 
-	"""
-	x = Column([1, 5, 9, 15], 'testers')
-	y = Column([1,2,3,4,5], 'test2')
-	z = {'testers': 30, 'test2': 35}
-	df = Table([x,y])
-	df.insert(20, z)
-	print(df)
-	val = 4
-	print(x._binary_search(val))
-	x.insert(x._binary_search(val), val)
+	x = Column([1,5,9,15])
+	y = Column()
 	print(x)
-	"""
+	print(y)
+	#z = {'testers': 30, 'test2': 35}
+	#df = Table([x,y])
+	#df.insert(20, z)
+	#print(df.data('list'))
+	#val = 4
+	#print(x._binary_search(val))
+	#x.insert(x._binary_search(val), val)
+	#print(x)
+	
 
 	#df1 = df1.filter(df1.col('First Name') < 'Tom')
 	#df1 = df1.select('Cohort','First Name')
