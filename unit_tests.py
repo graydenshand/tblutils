@@ -1,23 +1,30 @@
-import csv, re, pymysql, psycopg2, psycopg2.extras, copy, json
-from datetime import datetime, date
 from models import Table, Column
 
 if __name__ == "__main__":
-	#df = Table('student_data.csv')
-	#df1 = df.filter(df.select('First Name') != 'Grayden', df.select('Cohort') == 'ibex').sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
+	###
+	# TBLUTILS UNIT TESTS
+	###
+	
+	# LOADING DATA
 
-	#df1.append({'First Name': 'Grayden', 'Last Name': 'Shanaaaad'})
+	# SAVING DATA
+
+	# ACCESSING AND DISPLAYING DATA
+
+	df = Table('student_data.csv')
+	df1 = df.sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
+
 	#x = df1.select('Cohort') == 'ibex'
-	#print(df1.data())
+	print(df1.data())
 
 	#print(Table())
 
-	x = Column([1,5,9,15])
-	y = Column([1,2,3,4])
-	print(x)
-	print(y)
-	df = Table([x,y])
-	print(df.select("Column1"))
+	#x = Column([1,5,9,15])
+	#y = Column([1,2,3,4])
+	#print(x)
+	#print(y)
+	#df = Table([x,y])
+	#print(df.select("Column1"))
 	#df.insert(20, z)
 	#print(df.data('list'))
 	#val = 4
