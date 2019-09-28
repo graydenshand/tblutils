@@ -59,7 +59,7 @@ print(table.data()) # defaults to list of dictionaries
 # [{'Column1': 1, 'Column2': 1}, {'Column1': 5, 'Column2': 2}, {'Column1': 9, 'Column2': 3}, {'Column1': 15, 'Column2': 4}]
 ###
 
-print(tbl.data('list)) # list of lists
+print(tbl.data('list')) # list of lists
 
 ###
 # [['Column1', 'Column2'], [1, 1], [5, 2], [9, 3], [15, 4]]
