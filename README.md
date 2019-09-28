@@ -52,16 +52,20 @@ The `data()` method will return the serialized contents of the table. It takes o
 ```
 x = Column([1,5,9,15])
 y = Column([1,2,3,4])
-df = Table([x,y])
-print(df.data()) # defaults to list of dictionaries
+tbl = Table([x,y])
+print(table.data()) # defaults to list of dictionaries
 
 ###
 # [{'Column1': 1, 'Column2': 1}, {'Column1': 5, 'Column2': 2}, {'Column1': 9, 'Column2': 3}, {'Column1': 15, 'Column2': 4}]
 ###
 
-print(df.data('list)) # list of lists
+print(tbl.data('list)) # list of lists
 
 ###
 # [['Column1', 'Column2'], [1, 1], [5, 2], [9, 3], [15, 4]]
 ###
 ```
+
+Columns within a table can be accessed in two ways: 
+1) The first is to use their integer index and standard slice notation (e.g. `tbl[0] # returns first column`). Note, this means that `enumerate(tbl)` is a column-wise generator, row-wise enumeration can be achieved via `enumerate(tbl.data())`.
+2) Secondly, they can be accessed by their `.label` (column-name) through the table's `col()` method (e.g. `tbl.col('Column1')`).
