@@ -44,3 +44,24 @@ tbl.save("output.csv")
 # to save to a .json file named 'output.json'
 tbl.save("output.json")
 ```
+One can immediately see the ease of converting file types.
+
+### Accessing and Displaying Data
+The `data()` method will return the serialized contents of the table. It takes one parameter, `_format='dict'`, to indicate whether to return the data as a list of list or a list of dictionaries.
+
+```
+x = Column([1,5,9,15])
+y = Column([1,2,3,4])
+df = Table([x,y])
+print(df.data()) # defaults to list of dictionaries
+
+###
+# [{'Column1': 1, 'Column2': 1}, {'Column1': 5, 'Column2': 2}, {'Column1': 9, 'Column2': 3}, {'Column1': 15, 'Column2': 4}]
+###
+
+print(df.data('list)) # list of lists
+
+###
+# [['Column1', 'Column2'], [1, 1], [5, 2], [9, 3], [15, 4]]
+###
+```
