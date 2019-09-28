@@ -33,12 +33,15 @@ class Table():
 
 	def __repr__(self):
 		if len(self) != 0:
-			return'{} rows <> {}'.format(len(self), self._data)
+			return'{} rows <> {}'.format(len(self), self.headers())
 		else:
 			return('Empty Table Utility Instance')
 
 	def __getitem__(self,col):
 		return self._data[col]
+
+	def __setitem__(self, idx, col):
+		self._data[idx] = col
 
 	def __len__(self):
 		return 0 if len(self._data) == 0 else len(self._data[0])
@@ -81,7 +84,6 @@ class Table():
 	def load(self, data=None, data_type=None):
 		if data_type == None:
 			data_type = self._get_data_type(data)
-
 		# router to use appropriate loader function
 		if data_type == 'csv':
 			self._data = self._read_csv(data)
@@ -93,6 +95,8 @@ class Table():
 			self._data = self._load_long_lists(data)
 		elif data_type == 'json':
 			self._data = self._read_json(data)
+		elif data_type == 'column':
+			self._data = self._load_columns(data)
 		else:
 			raise ValueError("'{}' is not a supported data type".format(data_type))
 
@@ -100,10 +104,12 @@ class Table():
 		if isinstance(data, list):
 			if isinstance(data[0], list):
 				return 'list'
+			if isinstance(data[0], Column):
+				return 'column'
 			elif isinstance(data[0], dict):
 				return 'dict'
 		elif isinstance(data, str): # for parsing file names
-			search = re.search('\w+.(\w*)', data)
+			search = re.search('.+\.(\w*)', data)
 			return search.group(1)
 		else:
 			return False
@@ -119,7 +125,7 @@ class Table():
 							tmp_data.append(Column([],label=col))
 					else:
 						for item, col in enumerate(row):
-							tmp_data.append(Column([], label=None))
+							tmp_data.append(Column([], label=f'Column{item}'))
 				else:
 					for item, col in enumerate(row):
 						tmp_data[item].append(row[item])
@@ -135,6 +141,8 @@ class Table():
 					return self._load_lists(x, headers)
 			raise ValueError('Data should be list of lists/dicts')
 
+	def _load_columns(self, data):
+		return data
 
 	def _load_lists(self, data, headers=True):
 		tmp_data = []
@@ -144,7 +152,7 @@ class Table():
 					tmp_data.append(Column([],label=col))
 			elif i ==0:
 				for item, col in enumerate(row):
-					tmp_data.append(Column([],label=None))
+					tmp_data.append(Column([],label=f'Column{item}'))
 			else:
 				for item, col in enumerate(row):
 					tmp_data[item].append(row[item])
@@ -217,28 +225,37 @@ class Table():
 		return tmp
 
 	def sort(self, *cols):
-		# df1 = df.sort('First Name')
-		# df1 = df.sort('First Name', 'Zip')
 		tmp = self.copy()
-		col = self.col(cols[0])
+		for i, col in enumerate(tmp):
+			tmp[i] = Column([], col.label)
+		first_col = tmp.col(cols[0]) # get the first column to sort by
 		i = 0
-		sorted_col = Column()
 		indices = []
-		search_list = []
 		while i < len(self):
-			val = col[i]
-			idx = sorted_col._binary_search(val)
-			sorted_col.insert(idx, val)
-			indices.insert(idx, i)
+			row = {col.label:col[i] for col in self} # row to insert
+			val = row[first_col.label] # first val
+			idx = first_col._binary_search(val) # binary search to place the new value
+			if len(first_col) == i or val == first_col[i]: # new value is equal to the value currently at that index
+				tmp.insert(self._place_row(row, tmp, idx, 0, cols), row)
+			else: # new value is not different from adjacent value
+				tmp.insert(idx, row)
+			first_col = tmp.col(cols[0])
 			i += 1
-		tmp._data = []
-		for i, col in enumerate(self._data):
-			tmp_col = Column([],label=self._data[i].label)
-			for val in indices:
-				#print(self._data[i][val])
-				tmp_col.append(self._data[i][val])
-			tmp._data.append(tmp_col)
 		return tmp
+
+
+	def _place_row(self, row, data, row_idx, col_idx, cols):
+		col = data.col(cols[col_idx])
+		new_val = row[col.label]
+		#print(len(col), row_idx)
+		if len(col) == row_idx or new_val < col[row_idx]:
+			return row_idx
+		else:
+			if col_idx == len(cols)-1: # full row match
+				return self._place_row(row, data, row_idx+1, 0, cols) # advance to next row
+			else:
+				return self._place_row(row, data, row_idx, col_idx+1, cols) # check next column
+
 
 	def desc(self):
 		if len(self) > 0:
@@ -255,17 +272,23 @@ class Table():
 
 
 	def add(self, col):
-		new = self.copy()
 		if len(col) != len(self):
 			raise InputError("Input size doesn't match existing data.")
 		else:
-			new._data.append(col)
-		return new
+			if col.label == '':
+				flag = False
+				i = 0
+				while flag != True:
+					if f'Column{i}' not in self.headers():
+						flag = True
+						col.label = f'Column{i}'
+						self._data.append(col)
+					i += 1
+		return self
 
 	def append(self, row):
-		new = self.copy()
 		if isinstance(row, dict):
-			for col in self._data:
+			for col in self:
 				if col.label in row.keys():
 					col.append(row[col.label])
 				else:
@@ -277,6 +300,23 @@ class Table():
 				col.append(row[i])
 		else:	
 			raise TypeError('Data type not supported -- format as list or dictionary')
+
+
+	def insert(self, idx, row):
+		if isinstance(row, dict):
+			for col in self:
+				if col.label in row.keys():
+					col.insert(idx, row[col.label])
+				else:
+					col.insert(idx, None)
+		elif isinstance(row, (list, tuple)):
+			if len(row) != len(row):
+				raise ValueError('Different lengths. New row should specify value for each column')
+			for i, col in enumerate(self):
+				col.insert(idx, row[i])
+		else:	
+			raise TypeError('Data type not supported -- format as list or dictionary')
+				
 
 	## WRITER
 	def save(self, fn):
@@ -364,7 +404,10 @@ class Column():
 			self._type = _type
 
 	def __repr__(self):
-		return "{}".format(self.label)
+		if self.label != '':
+			return "{}: {}".format(self.label, self._data)
+		else:
+			return f"{self._data}"
 
 	def __getitem__(self, idx):
 		return self._data[idx]
@@ -628,7 +671,6 @@ class Column():
 		self._data.insert(idx, val)
 
 	def _binary_search(self, x, start=0, end=None):
-		# seq = sequence/list
 		# x = value
 		# start = lower search bound
 		# end = upper search bound
@@ -649,14 +691,14 @@ class Column():
 			elif x.lower() > self[mid].lower():
 				return self._binary_search(x, mid+1, end)
 			else:
-				return mid
+				return self._data.index(self[mid]) # return lowest index with this value
 		else:
 			if x < self[mid]:
 				return self._binary_search(x, start, mid)
 			elif x > self[mid]:
 				return self._binary_search(x, mid+1, end)
 			else:
-				return mid
+				return self._data.index(self[mid]) # return lowest index with this value
 
 	def sort(self):
 		# insertion sort using binary search
@@ -747,11 +789,25 @@ class Column():
 
 if __name__ == "__main__":
 	df = Table('student_data.csv')
-	df1 = df.filter(df.col('First Name') !='Grayden').sort('First Name').select('Cohort', 'First Name').desc()
+	df1 = df.filter(df.col('First Name') != 'Grayden', df.col('Cohort') == 'ibex').sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
 
 	#df1.append({'First Name': 'Grayden', 'Last Name': 'Shanaaaad'})
-
+	#x = df1.col('Cohort') == 'ibex'
 	print(df1.data())
+
+
+	"""
+	x = Column([1, 5, 9, 15], 'testers')
+	y = Column([1,2,3,4,5], 'test2')
+	z = {'testers': 30, 'test2': 35}
+	df = Table([x,y])
+	df.insert(20, z)
+	print(df)
+	val = 4
+	print(x._binary_search(val))
+	x.insert(x._binary_search(val), val)
+	print(x)
+	"""
 
 	#df1 = df1.filter(df1.col('First Name') < 'Tom')
 	#df1 = df1.select('Cohort','First Name')
