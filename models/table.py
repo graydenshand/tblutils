@@ -77,6 +77,8 @@ class Table():
 	def load(self, data, data_type=None, headers=True):
 		if data_type == None:
 			data_type = self._get_data_type(data)
+		if data_type == False:
+			self._data = []
 		# router to use appropriate loader function
 		if data_type == 'csv':
 			self._data = self._read_csv(data, headers)
@@ -93,9 +95,11 @@ class Table():
 
 	def _get_data_type(self, data):
 		if isinstance(data, list):
-			if isinstance(data[0], list):
+			if len(data) == 0:
+				return False
+			elif isinstance(data[0], list):
 				return 'list'
-			if isinstance(data[0], Column):
+			elif isinstance(data[0], Column):
 				return 'column'
 			elif isinstance(data[0], dict):
 				return 'dict'
