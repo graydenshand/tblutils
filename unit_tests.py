@@ -44,9 +44,13 @@ from models import Table, Column
 
 # 	COMPARATORS
 
-df = Table('student_data.csv')
-df1 = df.sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
-print(df1.data())
+x = Column([0,1,2,3,4,5])
+print(x!=5)
+
+
+#df = Table('student_data.csv')
+#df1 = df.sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
+#print(df1.data())
 
 #print(Table())
 

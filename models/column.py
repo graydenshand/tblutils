@@ -38,7 +38,7 @@ class Column():
 	def __eq__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
@@ -62,7 +62,7 @@ class Column():
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() != other:
+					if self[i] != other:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -75,7 +75,7 @@ class Column():
 	def __lt__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
@@ -93,12 +93,12 @@ class Column():
 		else:
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] >= other:
+					if self[i].lower() >= other.lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() >= other.lower():
+					if self[i] >= other:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -109,17 +109,17 @@ class Column():
 	def __le__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] > other[i]:
+					if self[i].lower() > other[i].lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() > other[i].lower():
+					if self[i] > other[i]:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -127,12 +127,12 @@ class Column():
 		else:
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] > other:
+					if self[i].lower() > other.lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() > other.lower():
+					if self[i] > other:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -143,17 +143,17 @@ class Column():
 	def __ge__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] < other[i]:
+					if self[i].lower() < other[i].lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() < other[i].lower():
+					if self[i] < other[i]:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -161,12 +161,12 @@ class Column():
 		else:
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] < other:
+					if self[i].lower() < other.lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() < other.lower():
+					if self[i] < other:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -176,17 +176,17 @@ class Column():
 	def __gt__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] <= other[i]:
+					if self[i].lower() < other[i].lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() <= other[i].lower():
+					if self[i] <= other[i]:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -194,12 +194,12 @@ class Column():
 		else:
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] <= other:
+					if self[i].lower() <= other.lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() <= other.lower():
+					if self[i] <= other:
 						tmp.append(False)
 					else:
 						tmp.append(True)
@@ -209,7 +209,7 @@ class Column():
 	def __add__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
@@ -224,7 +224,7 @@ class Column():
 	def __sub__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
@@ -239,7 +239,7 @@ class Column():
 	def __mul__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
@@ -254,7 +254,7 @@ class Column():
 	def __div__(self, other):
 		i = 0
 		tmp = []
-		if isinstance(self, (type(other), list, tuple)):
+		if isinstance(other, (list, tuple)):
 			if len(self) != len(other):
 				raise ValueError('Columns of different lengths')
 			while i < len(self):
@@ -396,3 +396,4 @@ class Column():
 		except Exception as e:
 			pass
 		return False
+
