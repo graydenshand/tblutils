@@ -57,12 +57,12 @@ class Column():
 		else:
 			while i < len(self):
 				if isinstance(self[i], (str,)):
-					if self[i] != other:
+					if self[i] != other.lower():
 						tmp.append(False)
 					else:
 						tmp.append(True)
 				else:
-					if self[i].lower() != other.lower():
+					if self[i].lower() != other:
 						tmp.append(False)
 					else:
 						tmp.append(True)
