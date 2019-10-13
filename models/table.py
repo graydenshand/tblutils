@@ -84,8 +84,10 @@ class Table():
 			self._data = self._read_csv(data, headers)
 		elif data_type == 'list':
 			self._data = self._load_lists(data, headers)
-		elif data_type == 'dict':
+		elif data_type == 'dicts':
 			self._data = self._load_dicts(data)
+		elif data_type == 'dict':
+			self._data = self._load_dict(data)
 		elif data_type == 'json':
 			self._data = self._read_json(data)
 		elif data_type == 'column':
@@ -100,10 +102,12 @@ class Table():
 			elif isinstance(data[0], Column):
 				return 'column'
 			elif isinstance(data[0], dict):
-				return 'dict'
+				return 'dicts'
 		elif isinstance(data, str): # for parsing file names
 			search = re.search('.+\.(\w*)', data)
 			return search.group(1)
+		elif isinstance(data, dict):
+			return 'dict'
 		else:
 			return False
 
@@ -176,6 +180,16 @@ class Table():
 				tmp_data[i].append(row[label])
 		return tmp_data
 
+	def _load_dict(self, data):
+		tmp_keys = ['key'] + list(data[list(data.keys())[0]].keys())
+		tmp_data = Table([Column([], label=label) for label in tmp_keys])
+		for key, val in data.items():
+			tmp_data[0].append(key)
+			for col, item in val.items():
+				col_idx = tmp_data.headers().index(col)
+				tmp_data[col_idx].append(item)
+		print(tmp_data._data)
+		return tmp_data._data
 
 	## MUTATORS
 	def _get_col_index(self, col):

@@ -44,8 +44,9 @@ from models import Table, Column
 
 # 	COMPARATORS
 
-x = Column([0,1,2,3,4,5])
-print(x!=5)
+x = {'alexandradipalma2': {'first': 1, 'second': 0}, 'davidbourne': {'first': 25, 'second': 60}, 'craig': {'first': 174, 'second': 323}}
+y = Table(x)
+print(y.data())
 
 
 #df = Table('student_data.csv')
