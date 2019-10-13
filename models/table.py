@@ -188,7 +188,6 @@ class Table():
 			for col, item in val.items():
 				col_idx = tmp_data.headers().index(col)
 				tmp_data[col_idx].append(item)
-		print(tmp_data._data)
 		return tmp_data._data
 
 	## MUTATORS
