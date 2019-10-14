@@ -280,6 +280,12 @@ class Table():
 		else:
 			return 
 
+	def rows(self, lower, upper):
+		# data.rows(10,20)
+		_filter = [True if i >= lower and i < upper else False for i in range(0, len(self))]
+		tmp = self.filter(_filter)
+		return tmp
+
 
 	def add(self, col):
 		if len(col) != len(self):

@@ -46,8 +46,9 @@ from models import Table, Column
 
 x = {'alexandradipalma2': {'first': 1, 'second': 0}, 'davidbourne': {'first': 25, 'second': 60}, 'craig': {'first': 174, 'second': 323}}
 y = Table(x)
-print(y.data())
-
+print(y.rows(1,3))
+#_filter = [True if i < 1 else False for i in range(0, len(y))]
+#print(y.filter(_filter).data())
 
 #df = Table('student_data.csv')
 #df1 = df.sort('Cohort', 'First Name').select('Cohort', 'First Name').desc()
