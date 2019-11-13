@@ -337,7 +337,7 @@ class Column():
 				i = len(self)
 			i +=1			
 		if test_val == None:
-			raise Exception('No values to determine type')
+			return 'text'
 		try:
 			int(test_val)
 			if int(test_val) == float(test_val):

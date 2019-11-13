@@ -9,7 +9,8 @@ class Table():
 	I/O
 		- read_csv
 		- load_lists (list of lists)
-		- load_dicts (lsit of dicts)
+		- load_dicts (list of dicts)
+		- load_dict (dict of dicts)
 		- save
 	Mutate
 		- select
